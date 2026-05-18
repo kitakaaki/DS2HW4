@@ -2,6 +2,7 @@
 *.json
 *.bin
 *.out
+/ds2hw4
 /.vscode/
 *.cnt
 *.adj
