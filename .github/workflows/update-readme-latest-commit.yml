@@ -1,0 +1,63 @@
+name: Update README Latest Commit
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Update README
+        run: |
+          python - <<'PY'
+          import pathlib
+          import subprocess
+
+          def git(args):
+            return subprocess.check_output(["git"] + args, text=True).strip()
+
+          short_sha = git(["log", "-1", "--pretty=format:%h"])
+          message = git(["log", "-1", "--pretty=format:%s"])
+          author = git(["log", "-1", "--pretty=format:%an"])
+          date = git(["log", "-1", "--pretty=format:%ad", "--date=iso"])
+
+          content = f"- `{short_sha}` {message} ({date}) by {author}"
+
+          readme = pathlib.Path("README.md")
+          text = readme.read_text()
+          start = "<!-- latest-commit-start -->"
+          end = "<!-- latest-commit-end -->"
+          block = f"{start}\n{content}\n{end}"
+
+          if start in text and end in text:
+            before, rest = text.split(start, 1)
+            _, after = rest.split(end, 1)
+            new_text = before + block + after
+          else:
+            if not text.endswith("\n"):
+              text += "\n"
+            new_text = text + "\n## Latest Commit\n\n" + block + "\n"
+
+          readme.write_text(new_text)
+          PY
+      - name: Commit changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update latest commit in README"
+          git push
