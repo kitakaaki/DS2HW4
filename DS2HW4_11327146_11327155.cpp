@@ -65,7 +65,7 @@ public:
         fileName = "pairs" + num + ".bin";
         ifstream file(fileName, ios::binary);
         if (!file.is_open()) {
-            cout << "\n### " << fileName << " does not exist! ###\n";
+            cout << "\n### " << fileName << " does not exist! ###\n\n";
             return true;
         }
 
@@ -103,25 +103,29 @@ public:
         if (outFile.is_open()) {
             outFile << "<<< There are " << adjList.size() << " IDs in total. >>>\n";
             int idx = 1;
+            int totalNodes = 0;
             for (const auto& node : adjList) {
+                totalNodes += node.edges.size();
                 outFile << "[" << setw(3) << idx << "] " << node.senderId << ": \n";
                 int count = 1;
-                for (int j = 0; j < node.edges.size(); j++) {
+                for (int j = 0; j < (int)node.edges.size(); j++) {
                     if (j % 12 == 0) outFile << "\t";
                     outFile << "(" << setw(2) << count << ") " << node.edges[j].receiverId << ", " << setw(6) << node.edges[j].weight;
-                    if (j % 12 == 11 || j == node.edges.size() - 1) outFile << "\n";
-                    else outFile << "\t";
+                    if (j % 12 == 11) outFile << "\n";
+                    else if (j != (int)node.edges.size() - 1) outFile << "\t";
                     count++;
                 }
+                outFile << "\n";
                 idx++;
             }
+            outFile << "<<< There are " << totalNodes << " nodes in total. >>>\n";
             outFile.close();
         }
         
         cout << "\n<<< There are " << adjList.size() << " IDs in total. >>>\n";
         int nodeCount = 0;
         for (const auto& n : adjList) nodeCount += n.edges.size();
-        cout << "\n<<< There are " << nodeCount << " nodes in total. >>>\n";
+        cout << "\n<<< There are " << nodeCount << " nodes in total. >>>\n\n";
         
         return true;
     }
@@ -140,7 +144,7 @@ public:
 
     bool task2() {
         if (adjList.empty()) {
-            cout << "\n### There is no graph and choose 1 first. ###\n";
+            cout << "### There is no graph and choose 1 first. ###\n\n";
             return true;
         }
 
@@ -198,46 +202,45 @@ public:
                     for (const auto& node : res.connectedNodes) {
                         if (j % 12 == 0) outFile << "\t";
                         outFile << "(" << setw(2) << count << ") " << node;
-                        if (j % 12 == 11 || (size_t)j == res.connectedNodes.size() - 1) outFile << "\n";
-                        else outFile << "\t";
+                        if (j % 12 == 11) outFile << "\n";
+                        else if (j != (int)res.connectedNodes.size() - 1) outFile << "\t";
                         j++;
                         count++;
                     }
                 }
+                outFile << "\n";
                 idx++;
             }
             outFile.close();
         }
         
-        cout << "\n<<< There are " << bfsResults.size() << " IDs in total. >>>\n";
+        cout << "\n<<< There are " << bfsResults.size() << " IDs in total. >>>\n\n";
 
         return true;
     }
 };
 
 int main() {
-    int command = -1;
     Graph g;
-    while (command != 0) {
+    string command;
+    while (true) {
         cout << "* Data Structures and Algorithms *\n"
              << "**** Graph data manipulation *****\n"
              << "* 0. QUIT                        *\n"
              << "* 1. Build adjacency lists       *\n"
              << "* 2. Compute connection counts   *\n"
              << "**********************************\n"
-             << "Input a choice(0, 1, 2): " << flush;
-        if (!(cin >> command)) {
+             << "Input a choice(0, 1, 2): ";
+        cin >> command;
+        if (command == "0") {
             break;
-        }
-        if (command == 0) {
-            break;
-        } else if (command == 1) {
+        } else if (command == "1") {
             g.clear();
-            while (g.task1());
-        } else if (command == 2) {
+            g.task1();
+        } else if (command == "2") {
             g.task2();
         } else {
-            cout << "\nCommand does not exist!\n";
+            cout << "\nCommand does not exist!\n\n";
         }
     }
     return 0;
