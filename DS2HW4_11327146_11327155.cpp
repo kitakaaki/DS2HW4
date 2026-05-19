@@ -9,6 +9,7 @@
 #include <queue>
 #include <cstring>
 #include <set>
+#include <limits>
 
 using namespace std;
 
@@ -52,9 +53,13 @@ public:
     }
 
     bool task1() {
-        cout << "\nInput a file number [0: quit]: ";
+        cout << "\nInput a file number ([0] Quit): ";
         string num;
-        cin >> num;
+        if (!(cin >> num)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return false;
+        }
         if (num == "0") return false;
 
         fileName = "pairs" + num + ".bin";
@@ -96,15 +101,28 @@ public:
         string outName = "pairs" + num + ".adj";
         ofstream outFile(outName);
         if (outFile.is_open()) {
+            outFile << "<<< There are " << adjList.size() << " IDs in total. >>>\n";
+            int idx = 1;
             for (const auto& node : adjList) {
-                outFile << "[" << node.senderId << "]\n";
-                for (const auto& edge : node.edges) {
-                    outFile << "\t" << edge.receiverId << "\t" << fixed << setprecision(2) << edge.weight << "\n";
+                outFile << "[" << setw(3) << idx << "] " << node.senderId << ": \n";
+                int count = 1;
+                for (int j = 0; j < node.edges.size(); j++) {
+                    if (j % 12 == 0) outFile << "\t";
+                    outFile << "(" << setw(2) << count << ") " << node.edges[j].receiverId << ", " << setw(6) << node.edges[j].weight;
+                    if (j % 12 == 11 || j == node.edges.size() - 1) outFile << "\n";
+                    else outFile << "\t";
+                    count++;
                 }
+                idx++;
             }
             outFile.close();
-            cout << "\n<" << outName << "> is generated...\n";
         }
+        
+        cout << "\n<<< There are " << adjList.size() << " IDs in total. >>>\n";
+        int nodeCount = 0;
+        for (const auto& n : adjList) nodeCount += n.edges.size();
+        cout << "\n<<< There are " << nodeCount << " nodes in total. >>>\n";
+        
         return true;
     }
 
@@ -116,7 +134,7 @@ public:
         bool operator<(const BFSResult& other) const {
             if (connectionCount != other.connectionCount)
                 return connectionCount > other.connectionCount;
-            return senderId > other.senderId; // arbitrary tie breaking or by ID
+            return senderId < other.senderId; 
         }
     };
 
@@ -170,19 +188,28 @@ public:
         string outName = fileName.substr(0, fileName.find_last_of('.')) + ".cnt";
         ofstream outFile(outName);
         if (outFile.is_open()) {
+            outFile << "<<< There are " << bfsResults.size() << " IDs in total. >>>\n";
+            int idx = 1;
             for (const auto& res : bfsResults) {
-                outFile << "[" << res.senderId << "]\t" << res.connectionCount << "\n";
+                outFile << "[" << setw(3) << idx << "] " << res.senderId << "(" << res.connectionCount << "): \n";
                 if (!res.connectedNodes.empty()) {
                     int count = 1;
+                    int j = 0;
                     for (const auto& node : res.connectedNodes) {
-                        outFile << "\t" << count << ": " << node << "\n";
+                        if (j % 12 == 0) outFile << "\t";
+                        outFile << "(" << setw(2) << count << ") " << node;
+                        if (j % 12 == 11 || (size_t)j == res.connectedNodes.size() - 1) outFile << "\n";
+                        else outFile << "\t";
+                        j++;
                         count++;
                     }
                 }
+                idx++;
             }
             outFile.close();
-            cout << "\n<" << outName << "> is generated...\n";
         }
+        
+        cout << "\n<<< There are " << bfsResults.size() << " IDs in total. >>>\n";
 
         return true;
     }
@@ -193,12 +220,15 @@ int main() {
     Graph g;
     while (command != 0) {
         cout << "* Data Structures and Algorithms *\n"
-             << "* 0. Quit                        *\n"
+             << "**** Graph data manipulation *****\n"
+             << "* 0. QUIT                        *\n"
              << "* 1. Build adjacency lists       *\n"
              << "* 2. Compute connection counts   *\n"
              << "**********************************\n"
-             << "Input a command (0, 1, 2): " << flush;
-        cin >> command;
+             << "Input a choice(0, 1, 2): " << flush;
+        if (!(cin >> command)) {
+            break;
+        }
         if (command == 0) {
             break;
         } else if (command == 1) {
