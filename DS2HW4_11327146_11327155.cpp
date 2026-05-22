@@ -60,8 +60,10 @@ public:
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             return false;
         }
-        if (num == "0") return false;
-
+        if (num == "0") {
+            cout << endl;
+            return false;
+        }
         fileName = "pairs" + num + ".bin";
         ifstream file(fileName, ios::binary);
         if (!file.is_open()) {
