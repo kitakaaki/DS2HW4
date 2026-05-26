@@ -418,7 +418,7 @@ public:
                     continue;
                 }
                 if (k < 1 || k > (int)results.size()) {
-                    cout << "\n### " << k << " is NOT in [1," << results.size() << "] ###" << endl;
+                    cout << "\n### " << k << " is NOT in [1," << results.size() << "] ###\n\n";
                     continue;
                 }
                 break;
