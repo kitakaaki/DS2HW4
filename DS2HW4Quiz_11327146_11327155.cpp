@@ -254,6 +254,9 @@ public:
                     }
                     continue;
                 }
+                if (threshold < 0) {
+                    continue;
+                }
                 if (threshold < 0.66f || threshold > 1.0f) {
                     cout << "\n### It is NOT in [0.66,1.0] ###" << endl;
                     continue;
@@ -414,6 +417,10 @@ public:
                 size_t pos = 0;
                 k = stoi(kInput, &pos);
                 if (pos != kInput.size()) {
+                    cout << "\n";
+                    continue;
+                }
+                if (k < 0) {
                     cout << "\n";
                     continue;
                 }
