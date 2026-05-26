@@ -11,6 +11,7 @@
 #include <set>
 #include <limits>
 #include <chrono>
+#include <cctype>
 
 using namespace std;
 
@@ -237,14 +238,24 @@ public:
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 continue;
             }
+            if (all_of(thresholdInput.begin(), thresholdInput.end(),
+                       [](unsigned char c) { return c == '.'; })) {
+                cout << "\n### It is NOT in [0.66,1.0] ###" << endl;
+                continue;
+            }
             try {
                 size_t pos = 0;
                 threshold = stof(thresholdInput, &pos);
                 if (pos != thresholdInput.size()) {
+                    // Treat inputs like ".." or "1.2.3" as numeric-ish and report range error.
+                    if (all_of(thresholdInput.begin(), thresholdInput.end(),
+                               [](unsigned char c) { return isdigit(c) || c == '.'; })) {
+                        cout << "\n### It is NOT in [0.66,1.0] ###" << endl;
+                    }
                     continue;
                 }
                 if (threshold < 0.66f || threshold > 1.0f) {
-                    cout << "\n### " << threshold << " is NOT in [0.66,1.0] ###" << endl;
+                    cout << "\n### It is NOT in [0.66,1.0] ###" << endl;
                     continue;
                 }
                 break;
@@ -407,7 +418,7 @@ public:
                     continue;
                 }
                 if (k < 1 || k > (int)results.size()) {
-                    cout << "### " << k << " is NOT in [1," << results.size() << "] ###" << endl;
+                    cout << "\n### " << k << " is NOT in [1," << results.size() << "] ###" << endl;
                     continue;
                 }
                 break;
